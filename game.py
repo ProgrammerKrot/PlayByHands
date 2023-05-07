@@ -37,6 +37,8 @@ button2 = pygame.Rect(300, 50, 200, 100)
 button3 = pygame.Rect(550, 50, 200, 100)
 
 
+
+
 def restart_game():
     global score1
     score1 = 0
@@ -144,6 +146,7 @@ targets = []
 score2 = 0
 missed = 0
 font = pygame.font.SysFont("Arial", 30)
+biggestfon = pygame.font.SysFont("Arial", 80)
 
 class Target:
     def __init__(self, x, y, size):
@@ -154,17 +157,31 @@ class Target:
     def draw(self, screen):
         pygame.draw.circle(screen, WHITE, (self.x, self.y), self.size)
 
+def update(targets):
+    for target in targets:
+        target.y += 5
+        if target.y > SCREEN_HEIGHT:
+            targets.remove(target)
+            targets.append(new_target())
+            global missed
+            missed += 1
 # Определяем функцию для создания новой цели
 def new_target():
-    size = random.randint(30, 60)
+    size = random.randint(40, 75)
     x = random.randint(size, SCREEN_WIDTH - size)
-    y = random.randint(size, SCREEN_HEIGHT - size)
+    y = 0
     return Target(x, y, size)
 
 # Создаем первые цели
 for i in range(5):
     targets.append(new_target())
 
+# Определяем кнопку "Выход"
+exit_button = pygame.Rect(10, SCREEN_HEIGHT-50, 100, 40)
+exit_text = font.render("Menu", True, RED)
+
+fromsitetomenu = pygame.Rect(300, 400, 250, 100)
+fromsitetomenu_text = biggestfon.render("Exit", True, RED)
 
 # Определяем переменную для счета очков
 score1 = 0
@@ -236,10 +253,10 @@ while running:
         text = font.render("Baskcet", True, WHITE)
         screen.blit(text, (50, 50))
         font = pygame.font.Font(None, 36)
-        text = font.render("Casino", True, WHITE)
+        text = font.render("Catch the ball", True, WHITE)
         screen.blit(text, (300, 50))
         font = pygame.font.Font(None, 36)
-        text = font.render("Continue", True, WHITE)
+        text = font.render("My Site", True, WHITE)
         screen.blit(text, (550, 50))
         count += 1
 
@@ -259,7 +276,7 @@ while running:
 
         try:
             if button3.collidepoint(hand_data["wrist"]) and hand_data["hand_closed"]:
-                menu_choice = previus_choice
+                menu_choice = 3
             if button1.collidepoint(hand_data["wrist"]) and hand_data["hand_closed"]:
                 menu_choice = 1
             if button2.collidepoint(hand_data["wrist"]) and hand_data["hand_closed"]:
@@ -271,8 +288,8 @@ while running:
     if menu_choice == 2:
         if hand_data["hand_closed"]:
             for target in targets:
-                distance = ((target.x - hand_data["wrist"][0]) ** 2 + (
-                            target.y - hand_data["wrist"][1]) ** 2) ** 0.5
+                distance = ((target.x - hand_data["wrist"][0]) ** 2 +
+                            (target.y - hand_data["wrist"][1]) ** 2) ** 0.5
                 if distance <= target.size:
                     targets.remove(target)
                     targets.append(new_target())
@@ -281,8 +298,33 @@ while running:
         for target in targets:
             target.draw(screen)
 
+        update(targets)
+
         score_text = font.render(f"Score: {score2}, Miss: {missed / 4}", True, BLUE)
         screen.blit(score_text, (10, 10))
+
+        screen.blit(exit_text, exit_button)
+        pygame.draw.rect(screen, RED, exit_button, 2)
+
+        try:
+            if exit_button.collidepoint(hand_data["wrist"]) and hand_data["hand_closed"]:
+                menu_choice = 0
+        except:
+            pass
+
+
+    if menu_choice == 3:
+        image = pygame.image.load("qr.png")
+        screen.blit(image, (300, 100))
+
+        screen.blit(fromsitetomenu_text, fromsitetomenu)
+        pygame.draw.rect(screen, RED, fromsitetomenu, 2)
+
+        try:
+            if fromsitetomenu.collidepoint(hand_data["wrist"]) and hand_data["hand_closed"]:
+                menu_choice = 0
+        except:
+            pass
 
 
     else:
