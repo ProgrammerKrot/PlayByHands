@@ -7,7 +7,7 @@ import threading
 
 menu_choice = None
 
-# Определяем цвета
+# Some colour
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
@@ -15,20 +15,20 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 hand_data = {'hand_closed': False, 'finger_tip': (0, 0), 'wrist': (0, 0)}
-# Инициализируем Pygame
+# Init pygame
 pygame.init()
 numberloop = 0
 pr_numberloop = -1
 
-# Задаем размеры окна
+# Windows size
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-# Создаем окно
+# window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Задаем заголовок окна
-pygame.display.set_caption("Кольцо")
+pygame.display.set_caption("game by hand in OHIO")
 
 #button for menu 0
 # creating 3 buttons
@@ -51,15 +51,15 @@ def detect_hand():
     global hand_data
 
     cap = cv2.VideoCapture(0) #Камера
-    hands = mp.solutions.hands.Hands(max_num_hands=2) #Объект ИИ для определения ладони
-    draw = mp.solutions.drawing_utils #Для рисование ладони
+    hands = mp.solutions.hands.Hands(max_num_hands=2) #Object for Ai hand detecting
+    draw = mp.solutions.drawing_utils #for drawing hand
     cv2.namedWindow("Hand", cv2.WINDOW_NORMAL)
 
     while True:
-        success, image = cap.read() #Считываем изображение с камеры
-        image = cv2.flip(image, 1) #Отражаем изображение для корекктной картинки
-        imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) #Конвертируем в rgb
-        results = hands.process(imageRGB) #Работа mediapipe
+        success, image = cap.read() #looking on camera
+        image = cv2.flip(image, 1) #camera now mirror
+        imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) #converting it rgb
+        results = hands.process(imageRGB) #work mediapipe
 
         hand_data = {"hand_closed": False, "finger_tip": None, "wrist": None}
 
@@ -68,7 +68,7 @@ def detect_hand():
                 for id, lm in enumerate(handLms.landmark):
                     h, w, c = image.shape
                     cx, cy = int(lm.x * w), int(lm.y * h)
-                    # Пересчитываем координаты с использованием пропорций
+                    # Recalculating coordinates using proportions
                     cx = int(cx * 800 / w)
                     cy = int(cy * 600 / h)
 
@@ -81,14 +81,14 @@ def detect_hand():
                 if hand_data["finger_tip"] is not None and hand_data["wrist"] is not None:
                     distance = ((hand_data["finger_tip"][0] - hand_data["wrist"][0]) ** 2 + (hand_data["finger_tip"][1] - hand_data["wrist"][1]) ** 2) ** 0.5
 
-                    # Если расстояние меньше определенного порога, то считаем, что рука сжата в кулак
+                    # If the distance is less than a certain threshold, then we assume that the hand is clenched into a fist
                     if distance < 100:
                         hand_data["hand_closed"] = True
 
-                draw.draw_landmarks(image, handLms, mp.solutions.hands.HAND_CONNECTIONS) #Рисуем ладонь
+                draw.draw_landmarks(image, handLms, mp.solutions.hands.HAND_CONNECTIONS) #drawing hand
 
         cv2.resizeWindow("Hand", 800, 600)
-        cv2.imshow("Hand", image) #Отображаем картинку
+        cv2.imshow("Hand", image) #mirroring
 
         if cv2.waitKey(1) & 0xFF == 27:
             break
@@ -98,9 +98,6 @@ def detect_hand():
 
 
 
-
-
-# Создаем класс для мяча
 class Ball:
     def __init__(self):
         self.radius = 20
@@ -113,7 +110,7 @@ class Ball:
         self.x += self.speed_x
         self.y += self.speed_y
 
-        # Отражаем мяч от стенок
+        # We reflect the ball off the walls
         if self.x < self.radius or self.x > SCREEN_WIDTH - self.radius:
             self.speed_x = -self.speed_x
         if self.y < self.radius or self.y > SCREEN_HEIGHT - self.radius:
@@ -123,7 +120,6 @@ class Ball:
         pygame.draw.circle(screen, GREEN, (self.x, self.y), self.radius)
 
 
-# Создаем класс для кольца
 class Ring:
     def __init__(self):
         self.width = 20
@@ -138,7 +134,6 @@ class Ring:
         self.y = pos[1]
 
 
-# Создаем мяч и кольцо
 ball = Ball()
 ring = Ring()
 
@@ -165,25 +160,25 @@ def update(targets):
             targets.append(new_target())
             global missed
             missed += 1
-# Определяем функцию для создания новой цели
+# Defining a function to create a new goal
 def new_target():
     size = random.randint(40, 75)
     x = random.randint(size, SCREEN_WIDTH - size)
     y = 0
     return Target(x, y, size)
 
-# Создаем первые цели
+# Creating the first goals
 for i in range(5):
     targets.append(new_target())
 
-# Определяем кнопку "Выход"
+# Define the "Exit" button
 exit_button = pygame.Rect(10, SCREEN_HEIGHT-50, 100, 40)
 exit_text = font.render("Menu", True, RED)
 
 fromsitetomenu = pygame.Rect(300, 400, 250, 100)
 fromsitetomenu_text = biggestfon.render("Exit", True, RED)
 
-# Определяем переменную для счета очков
+#Defining a variable for scoring points
 score1 = 0
 
 menu_choice = 0
@@ -191,7 +186,7 @@ previus_choice = 0
 
 need_pause = False
 
-# Запускаем игру
+# launching game
 count = 0
 thread = threading.Thread(target=detect_hand)
 thread.daemon = True
@@ -200,13 +195,11 @@ running = True
 while running:
     screen.fill(BLACK)
     numberloop += 1
-    # Обрабатываем события
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     if menu_choice == 1:
-        # Двигаем кольцо за мышкой
         try:
             if hand_data["hand_closed"] and restart_button.collidepoint(hand_data["wrist"]):
                 menu_choice = 0
@@ -219,10 +212,10 @@ while running:
 
         print(hand_data)
 
-        # Двигаем мяч
+        # moving ball
         ball.move()
 
-        # Отрисовываем мяч и кольцо
+        # Drawing the ball and the ring
         screen.fill(BLACK)
         ball.draw()
         ring.draw()
@@ -230,13 +223,13 @@ while running:
         text = font.render("Menu", True, BLACK)
         screen.blit(text, (10, 500))
 
-        # Проверяем, попал ли мяч в кольцо
+        # Check if the ball has hit the ring
         if abs(ball.x - ring.x) < ring.width // 2 + ball.radius and abs(ball.y - ring.y) < ring.height // 2 + ball.radius:
             score1 += 1
             ball = Ball()
 
 
-        # Отрисовываем счет
+        # Drawing the invoice
         font = pygame.font.Font(None, 36)
         text = font.render("Score: " + str(score1), True, WHITE)
         screen.blit(text, (10, 10))
@@ -339,11 +332,11 @@ while running:
         pass
 
 
-    # Обновляем экран
+    # screen updating
     pygame.display.flip()
 
-    # Ограничиваем частоту кадров
+    # Limiting the frame rate
     pygame.time.Clock().tick(60)
 
-# Выходим из Pygame
+# exit
 pygame.quit()
