@@ -27,7 +27,6 @@ SCREEN_HEIGHT = 600
 # window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-# Задаем заголовок окна
 pygame.display.set_caption("game by hand in OHIO")
 
 #button for menu 0
