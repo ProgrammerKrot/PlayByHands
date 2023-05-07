@@ -12,6 +12,7 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 hand_data = {'hand_closed': False, 'finger_tip': (0, 0), 'wrist': (0, 0)}
 # Инициализируем Pygame
@@ -37,8 +38,8 @@ button3 = pygame.Rect(550, 50, 200, 100)
 
 
 def restart_game():
-    global score
-    score = 0
+    global score1
+    score1 = 0
     ball.__init__()
     ring.__init__()
 
@@ -139,9 +140,34 @@ class Ring:
 ball = Ball()
 ring = Ring()
 
+targets = []
+score2 = 0
+missed = 0
+font = pygame.font.SysFont("Arial", 30)
+
+class Target:
+    def __init__(self, x, y, size):
+        self.x = x
+        self.y = y
+        self.size = size
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, WHITE, (self.x, self.y), self.size)
+
+# Определяем функцию для создания новой цели
+def new_target():
+    size = random.randint(30, 60)
+    x = random.randint(size, SCREEN_WIDTH - size)
+    y = random.randint(size, SCREEN_HEIGHT - size)
+    return Target(x, y, size)
+
+# Создаем первые цели
+for i in range(5):
+    targets.append(new_target())
+
 
 # Определяем переменную для счета очков
-score = 0
+score1 = 0
 
 menu_choice = 0
 previus_choice = 0
@@ -189,13 +215,13 @@ while running:
 
         # Проверяем, попал ли мяч в кольцо
         if abs(ball.x - ring.x) < ring.width // 2 + ball.radius and abs(ball.y - ring.y) < ring.height // 2 + ball.radius:
-            score += 1
+            score1 += 1
             ball = Ball()
 
 
         # Отрисовываем счет
         font = pygame.font.Font(None, 36)
-        text = font.render("Score: " + str(score), True, WHITE)
+        text = font.render("Score: " + str(score1), True, WHITE)
         screen.blit(text, (10, 10))
 
     if menu_choice == 0:
@@ -236,8 +262,27 @@ while running:
                 menu_choice = previus_choice
             if button1.collidepoint(hand_data["wrist"]) and hand_data["hand_closed"]:
                 menu_choice = 1
+            if button2.collidepoint(hand_data["wrist"]) and hand_data["hand_closed"]:
+                menu_choice = 2
         except:
             pass
+
+
+    if menu_choice == 2:
+        if hand_data["hand_closed"]:
+            for target in targets:
+                distance = ((target.x - hand_data["wrist"][0]) ** 2 + (
+                            target.y - hand_data["wrist"][1]) ** 2) ** 0.5
+                if distance <= target.size:
+                    targets.remove(target)
+                    targets.append(new_target())
+                    score2 += 1
+
+        for target in targets:
+            target.draw(screen)
+
+        score_text = font.render(f"Score: {score2}, Miss: {missed / 4}", True, BLUE)
+        screen.blit(score_text, (10, 10))
 
 
     else:
@@ -253,7 +298,7 @@ while running:
 
 
     # Обновляем экран
-    pygame.display.update()
+    pygame.display.flip()
 
     # Ограничиваем частоту кадров
     pygame.time.Clock().tick(60)

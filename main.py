@@ -20,7 +20,7 @@ pygame.display.set_caption("Лови цели мышкой")
 
 # Определяем переменные
 targets = []
-score = 0
+score1 = 0
 missed = 0
 font = pygame.font.SysFont("Arial", 30)
 
@@ -61,7 +61,7 @@ while running:
                 if distance <= target.size:
                     targets.remove(target)
                     targets.append(Target(random.randint(30, 60)))
-                    score += 1
+                    score1 += 1
 
     # Очищаем экран
     screen.fill(WHITE)
@@ -83,7 +83,7 @@ while running:
         target.draw(screen)
 
     # Рисуем счет на экране
-    score_text = font.render(f"Score: {score}, Missed: {missed}", True, BLUE)
+    score_text = font.render(f"Score: {score1}, Missed: {missed}", True, BLUE)
     screen.blit(score_text, (10, 10))
 
     # Обновляем экран
