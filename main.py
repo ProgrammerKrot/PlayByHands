@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import pygame
 import threading
+import random
 
 
 
@@ -15,6 +16,30 @@ pygame.init()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("My Game")
 background = pygame.image.load("backgroundtest.png") #background
+
+
+class Ball:
+    def __init__(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.velocity = [0, 0]
+        self.acceleration = [0, 0]
+        self.gravity = 0.1
+
+    def update(self):
+        self.velocity[0] += self.acceleration[0]
+        self.velocity[1] += self.acceleration[1] + self.gravity
+        self.x += self.velocity[0]
+        self.y += self.velocity[1]
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, (255, 255, 255), (int(self.x), int(self.y)), self.radius)
+
+
+ball = Ball(100, 100, 20)
+
+canvas = pygame.Surface((800, 600))
 
 def detect_hand():
     global hand_data
@@ -76,15 +101,32 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    canvas.fill((0, 0, 0))
+    ball.update()
+    ball.draw(canvas)
+
+
     print(hand_data)
     try:
+        if (hand_data["wrist"][0] - ball.x) ** 2 + (hand_data["wrist"][1] - ball.y) ** 2 <= ball.radius ** 2:
+            if hand_data["hand_closed"]:
+                # Grab the ball
+                ball.x, ball.y = hand_data["wrist"]
+                ball.velocity = [0, 0]
+            else:
+                # Throw the ball
+                dist = ((hand_data["wrist"][0] - ball.x) ** 2 + (hand_data["wrist"][1] - ball.y) ** 2) ** 0.5
+                direction = [(hand_data["wrist"][0] - ball.x) / dist, (hand_data["wrist"][1] - ball.y) / dist]
+                ball.velocity = [direction[0] * dist / 10 + random.uniform(-1, 1),
+                                 direction[1] * dist / 10 + random.uniform(-1, 1)]
         if hand_data["hand_closed"]:
-            pygame.draw.rect(screen, (255, 0, 255), (hand_data["wrist"][0], hand_data["wrist"][1], 20, 20))
+            pygame.draw.rect(canvas, (255, 0, 255), (hand_data["wrist"][0], hand_data["wrist"][1], 20, 20))
         else:
-            pygame.draw.rect(screen, (0, 255, 255), (hand_data["wrist"][0], hand_data["wrist"][1], 20, 20))
+            pygame.draw.rect(canvas, (0, 255, 255), (hand_data["wrist"][0], hand_data["wrist"][1], 20, 20))
     except:
         pass
 
+    screen.blit(canvas, (0, 0))
     pygame.display.flip()
 
 
