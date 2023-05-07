@@ -17,3 +17,5 @@ The following libraries are required to run the project:
 - `cv2` for working with the camera 
 - `mediapipe` for hand detecting
 - and random)))
+
+Thanks for giving a hint: https://github.com/celsoares
