@@ -16,6 +16,7 @@ The following libraries are required to run the project:
 - `threading` for supporting multithreading 
 - `cv2` for working with the camera 
 - `mediapipe` for hand detecting
-- and random)))
+- `random` juast to spawn objects randomly (embedded)
+
 
 Thanks for giving a hint: https://github.com/celsoares
